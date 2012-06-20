@@ -765,18 +765,30 @@
     $.fn.spectrum.loadOpts = {};
     $.fn.spectrum.draggable = draggable;
 
-    $.fn.spectrum.processNativeColorInputs = function() {
+    $.fn.spectrum.polyfill = function() {
         var supportsColor = $("<input type='color' />")[0].type === "color";       
         if (!supportsColor) {
-            $("input[type=color]").spectrum({
+            input_color = "input[type=color]"
+            $(input_color).spectrum({
                 preferredFormat: "hex6"
             });
+
+            if (document.addEventListener) {
+                document.addEventListener('DOMNodeInserted', function (evt) {
+                    var node = evt.target;
+                    if (node.nodeType == Node.ELEMENT_NODE) {
+                        $(node).filter(input_color).add($(node).find(input_color)).spectrum({
+                            preferredFormat: "hex6"
+                        });
+                    }
+                }, false);
+            }
         }
     };
     
     $(function () {
         if ($.fn.spectrum.load) {
-            $.fn.spectrum.processNativeColorInputs();
+            $.fn.spectrum.polyfill();
         }
     });
 
